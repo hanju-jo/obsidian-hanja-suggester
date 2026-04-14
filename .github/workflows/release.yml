@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify manifest version matches tag
+        run: |
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          TAG_VERSION="${{ steps.version.outputs.VERSION }}"
+          # beta 태그(x.y.z-beta.N)는 manifest의 x.y.z와 비교
+          BASE_VERSION="${TAG_VERSION%%-*}"
+          if [ "$MANIFEST_VERSION" != "$BASE_VERSION" ]; then
+            echo "::error::manifest.json version ($MANIFEST_VERSION) does not match tag base version ($BASE_VERSION)"
+            exit 1
+          fi
+
+      - name: Determine if pre-release
+        id: prerelease
+        run: |
+          if [[ "${{ steps.version.outputs.VERSION }}" == *"-beta."* ]]; then
+            echo "IS_PRERELEASE=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "IS_PRERELEASE=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: ${{ steps.version.outputs.VERSION }}
+          prerelease: ${{ steps.prerelease.outputs.IS_PRERELEASE }}
+          files: |
+            main.js
+            manifest.json
