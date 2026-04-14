@@ -187,32 +187,26 @@ export default class HanjaSuggesterPlugin extends Plugin {
     // 한글 가나다순 정렬
     entries.sort(([a], [b]) => a.localeCompare(b, "ko"));
 
-    const now = new Date().toLocaleString("ko-KR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
     const lines: string[] = [
       "# 한자 사전 (Hanja Dictionary)",
       "",
-      `> **마지막 업데이트:** ${now}  `,
+      `> **마지막 업데이트:** ${dateStr} ${timeStr}  `,
       `> **총 표제어:** ${entries.length}개`,
       "",
       "---",
       "",
-      "| 한글 | 한자 | 사용 횟수 | 출처 파일 |",
-      "| :--- | :--: | :-------: | :-------- |",
     ];
 
     for (const [korean, hanjaList] of entries) {
       // 같은 한글에 여러 한자가 있으면 빈도 내림차순
       const sorted = [...hanjaList].sort((a, b) => b.count - a.count);
       for (const entry of sorted) {
-        const sources = entry.sources.map((s) => `\`${s}\``).join(", ");
-        lines.push(`| ${korean} | ${entry.hanja} | ${entry.count} | ${sources} |`);
+        lines.push(`${korean}:${entry.hanja}::${entry.count}`);
       }
     }
 
