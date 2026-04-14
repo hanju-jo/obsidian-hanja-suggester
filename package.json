@@ -1,0 +1,20 @@
+{
+  "name": "hanja-suggester",
+  "version": "0.0.1",
+  "description": "Obsidian Hanja Suggester Plugin",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production"
+  },
+  "keywords": ["obsidian", "hanja", "korean"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "0.25.2",
+    "obsidian": "latest",
+    "tslib": "2.8.1",
+    "typescript": "5.8.3"
+  }
+}
