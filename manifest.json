@@ -1,7 +1,7 @@
 {
   "id": "hanja-suggester",
   "name": "Hanja Suggester",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.3",
   "minAppVersion": "1.0.0",
   "description": "Vault 전체를 스캔하여 한글-한자 변환 사전을 구축하고, 선택한 한글에 한자 후보를 제안합니다.",
   "author": "user1",
