@@ -34,10 +34,8 @@ jobs:
         run: |
           MANIFEST_VERSION=$(jq -r '.version' manifest.json)
           TAG_VERSION="${{ steps.version.outputs.VERSION }}"
-          # beta 태그(x.y.z-beta.N)는 manifest의 x.y.z와 비교
-          BASE_VERSION="${TAG_VERSION%%-*}"
-          if [ "$MANIFEST_VERSION" != "$BASE_VERSION" ]; then
-            echo "::error::manifest.json version ($MANIFEST_VERSION) does not match tag base version ($BASE_VERSION)"
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
             exit 1
           fi
 
