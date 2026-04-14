@@ -90,5 +90,3 @@ type HanjaDictionary = Record<string, HanjaEntry[]>;
 ## 버전 관리 규칙
 
 `manifest.json`과 `package.json`의 `version` 필드를 항상 동일하게 유지한다.
-
-현재 버전: **0.0.1**

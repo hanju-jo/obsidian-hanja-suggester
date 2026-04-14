@@ -251,8 +251,8 @@ export default class HanjaSuggesterPlugin extends Plugin {
     }
 
     new HanjaSuggestModal(this.app, korean, candidates, (chosen) => {
-      // 선택한 한자를 `한글(漢字)` 형식으로 치환
-      editor.replaceSelection(`${korean}(${chosen})`);
+      // 선택한 한글을 한자로 치환
+      editor.replaceSelection(chosen);
     }).open();
   }
 
