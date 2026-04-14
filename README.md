@@ -53,14 +53,14 @@ Vault의 모든 마크다운 파일을 읽어 한자 표기를 수집합니다. 
 
 ### 2단계: 사전 확인 (선택)
 
-**"한자 사전 파일 열기"** 명령어를 실행하면 수집된 사전을 마크다운 표로 확인할 수 있습니다.
+**"한자 사전 파일 열기"** 명령어를 실행하면 수집된 사전을 확인할 수 있습니다.
 
 ```
-| 한글       | 한자 | 사용 횟수 | 출처 파일          |
-| :--------- | :--: | :-------: | :----------------- |
-| 대한민국   | 大韓民國 |   3   | `역사 노트`, `개요` |
-| 사전       | 辭典 |    5      | `용어 정리`         |
+대한민국:大韓民國::3
+사전:辭典:말 사, 법 전:5
 ```
+
+형식은 `한글:한자:뜻:사용횟수`입니다. 뜻은 libhangul 데이터에 등재된 항목에만 표시됩니다.
 
 ### 3단계: 한자 변환
 
@@ -101,3 +101,20 @@ A. **"전체 Vault 한자 인덱싱"** 을 다시 실행하면 사전 파일이 
 ## 라이선스
 
 MIT
+
+### 한자 뜻 데이터
+
+이 플러그인은 빌드 시 [libhangul](https://github.com/libhangul/libhangul) 프로젝트의 `data/hanja/hanja.txt`에서 한자 뜻 데이터를 가져와 번들에 포함합니다.
+
+해당 파일의 라이선스 고지:
+
+> Copyright (c) 2005,2006 Choe Hwanjin  
+> All rights reserved.
+>
+> Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+>
+> 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+> 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+> 3. Neither the name of the author nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+>
+> THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.

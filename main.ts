@@ -8,6 +8,7 @@ import {
   SuggestModal,
   TFile,
 } from "obsidian";
+import HANJA_MEANINGS from "hanja-data";
 
 // ─── 타입 정의 ───────────────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ interface HanjaEntry {
   hanja: string;
   count: number;
   sources: string[];
+  meaning?: string;
 }
 
 // 한글 → 한자 후보 목록
@@ -119,6 +121,13 @@ export default class HanjaSuggesterPlugin extends Plugin {
       }
     }
 
+    // 뜻 데이터 적용 (빌드 시 번들된 libhangul hanja.txt 기반)
+    for (const [korean, hanjaList] of Object.entries(this.dictionary)) {
+      for (const entry of hanjaList) {
+        entry.meaning = HANJA_MEANINGS[`${korean}:${entry.hanja}`] ?? "";
+      }
+    }
+
     await this.savePluginData();
     await this.writeDictionaryFile();
 
@@ -206,7 +215,7 @@ export default class HanjaSuggesterPlugin extends Plugin {
       // 같은 한글에 여러 한자가 있으면 빈도 내림차순
       const sorted = [...hanjaList].sort((a, b) => b.count - a.count);
       for (const entry of sorted) {
-        lines.push(`${korean}:${entry.hanja}::${entry.count}`);
+        lines.push(`${korean}:${entry.hanja}:${entry.meaning ?? ""}:${entry.count}`);
       }
     }
 
