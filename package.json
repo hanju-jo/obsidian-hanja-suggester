@@ -1,6 +1,6 @@
 {
   "name": "hanja-suggester",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.1-beta.4",
   "description": "Obsidian Hanja Suggester Plugin",
   "main": "main.js",
   "scripts": {
