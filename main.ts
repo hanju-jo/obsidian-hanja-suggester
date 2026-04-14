@@ -15,7 +15,6 @@ import HANJA_MEANINGS from "hanja-data";
 interface HanjaEntry {
   hanja: string;
   count: number;
-  sources: string[];
   meaning?: string;
 }
 
@@ -114,7 +113,7 @@ export default class HanjaSuggesterPlugin extends Plugin {
 
       try {
         const content = await this.app.vault.read(file);
-        this.extractPairsFromText(content, file.basename);
+        this.extractPairsFromText(content);
         fileCount++;
       } catch (e) {
         console.warn(`파일 읽기 실패: ${file.path}`, e);
@@ -122,9 +121,19 @@ export default class HanjaSuggesterPlugin extends Plugin {
     }
 
     // 뜻 데이터 적용 (빌드 시 번들된 libhangul hanja.txt 기반)
+    // hanja.txt는 단일 글자 쌍(한글:한자)만 가지므로 글자 수가 같을 때만 1:1로 조회
     for (const [korean, hanjaList] of Object.entries(this.dictionary)) {
       for (const entry of hanjaList) {
-        entry.meaning = HANJA_MEANINGS[`${korean}:${entry.hanja}`] ?? "";
+        if (korean.length !== entry.hanja.length) {
+          entry.meaning = "";
+          continue;
+        }
+        const meanings: string[] = [];
+        for (let i = 0; i < korean.length; i++) {
+          const m = HANJA_MEANINGS[`${korean[i]}:${entry.hanja[i]}`];
+          if (m) meanings.push(m);
+        }
+        entry.meaning = meanings.join(", ");
       }
     }
 
@@ -138,25 +147,23 @@ export default class HanjaSuggesterPlugin extends Plugin {
   }
 
   /** 텍스트에서 한글-한자 패턴을 찾아 사전에 추가 */
-  private extractPairsFromText(text: string, sourceName: string): void {
+  private extractPairsFromText(text: string): void {
     // 패턴 1: 한글(漢字)
-    this.applyPattern(PATTERN_PAREN, text, sourceName, 1, 2);
+    this.applyPattern(PATTERN_PAREN, text, 1, 2);
     // 패턴 2: <ruby>漢字<rt>한글</rt></ruby>  (그룹 순서: 한자=1, 한글=2)
-    this.applyPattern(PATTERN_RUBY, text, sourceName, 2, 1);
+    this.applyPattern(PATTERN_RUBY, text, 2, 1);
   }
 
   /**
    * 정규식을 텍스트에 적용하여 사전에 쌍을 추가한다.
    * @param pattern  실행할 정규식 (g 플래그 필수)
    * @param text     대상 텍스트
-   * @param source   출처 파일 이름
    * @param koreanGroup  한글 캡처 그룹 번호
    * @param hanjaGroup   한자 캡처 그룹 번호
    */
   private applyPattern(
     pattern: RegExp,
     text: string,
-    source: string,
     koreanGroup: number,
     hanjaGroup: number
   ): void {
@@ -174,11 +181,8 @@ export default class HanjaSuggesterPlugin extends Plugin {
       const existing = this.dictionary[korean].find((e) => e.hanja === hanja);
       if (existing) {
         existing.count++;
-        if (!existing.sources.includes(source)) {
-          existing.sources.push(source);
-        }
       } else {
-        this.dictionary[korean].push({ hanja, count: 1, sources: [source] });
+        this.dictionary[korean].push({ hanja, count: 1 });
       }
     }
   }
@@ -305,13 +309,7 @@ class HanjaSuggestModal extends SuggestModal<HanjaCandidate> {
 
   getSuggestions(query: string): HanjaCandidate[] {
     if (!query) return this.candidates;
-    return this.candidates.filter(
-      (c) =>
-        c.entry.hanja.includes(query) ||
-        c.entry.sources.some((s) =>
-          s.toLowerCase().includes(query.toLowerCase())
-        )
-    );
+    return this.candidates.filter((c) => c.entry.hanja.includes(query));
   }
 
   renderSuggestion(candidate: HanjaCandidate, el: HTMLElement): void {
@@ -323,10 +321,10 @@ class HanjaSuggestModal extends SuggestModal<HanjaCandidate> {
     main.createSpan({ cls: "hanja-char", text: entry.hanja });
     main.createSpan({ cls: "hanja-korean", text: ` (${korean})` });
 
-    // 빈도 + 출처
+    // 빈도 + 뜻
     const meta = wrapper.createDiv({ cls: "hanja-suggestion-meta" });
     meta.createSpan({
-      text: `${entry.count}회 사용 · 출처: ${entry.sources.slice(0, 3).join(", ")}${entry.sources.length > 3 ? ` 외 ${entry.sources.length - 3}개` : ""}`,
+      text: `${entry.count}회 사용${entry.meaning ? ` · ${entry.meaning}` : ""}`,
     });
   }
 
